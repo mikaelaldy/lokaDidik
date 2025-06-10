@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ProblemCard } from '@/components/ProblemCard';
 import { toast } from '@/hooks/use-toast';
 import { Download, BookOpen } from 'lucide-react';
+import { generatePDFWithWatermark } from '@/utils/pdfGenerator';
 
 interface Problem {
   id: string;
@@ -96,10 +96,28 @@ const Index = () => {
   };
 
   const handleDownloadPDF = () => {
-    toast({
-      title: "PDF Sedang Diunduh",
-      description: "Lembar kerja dan kunci jawaban akan segera tersedia.",
-    });
+    if (problems.length === 0) {
+      toast({
+        title: "Tidak Ada Soal",
+        description: "Silakan buat soal terlebih dahulu sebelum mengunduh PDF.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      generatePDFWithWatermark(problems, `Kelas ${gradeLevel}`, topic, localContext);
+      toast({
+        title: "PDF Berhasil Diunduh",
+        description: "Lembar kerja dan kunci jawaban telah disimpan dengan watermark lokaDidik.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan saat membuat PDF. Silakan coba lagi.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
